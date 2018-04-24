@@ -40,7 +40,6 @@ class App extends Component {
     handleScroll = (e) => {
         const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
         if (bottom) {
-            console.log('bottom reached');
             this.getNextPage();
         }
     };
