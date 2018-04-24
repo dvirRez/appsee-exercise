@@ -1,8 +1,24 @@
 import React, { Component } from 'react';
 import { FormControl, Button, Label } from 'react-bootstrap';
-import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table'
-import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css'
+import DataTable from './Components/DataTable/DataTable';
+import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import './App.css';
+
+const tblMapping = {
+    key: 'Id',
+    cols: [
+        'StartTime',
+        'Id',
+        'Platform',
+        'AppVersion',
+        'Connectivity',
+        'Device',
+        'OSVersion',
+        'SessionIndex',
+        'UserId',
+        'UserIndex'
+        ],
+};
 
 class App extends Component {
     state = {
@@ -94,90 +110,53 @@ class App extends Component {
         );
     };
 
-    renderSessionsRows() {
-        return (
-            this.state.sessions.map( session => (
-                <Tr key={session.Id}>
-                    <Td>{session.StartTime}</Td>
-                    <Td>{session.Id}</Td>
-                    <Td>{session.Platform}</Td>
-                    <Td>{session.AppVersion}</Td>
-                    <Td>{session.Connectivity}</Td>
-                    <Td>{session.Device}</Td>
-                    <Td>{session.OSVersion}</Td>
-                    <Td>{session.SessionIndex}</Td>
-                    <Td>{session.UserId}</Td>
-                    <Td>{session.UserIndex}</Td>
-                </Tr>
-            ))
-        );
-    }
-
     renderSessionsTable() {
         return (
-            <Table>
-                <Thead>
-                <Tr>
-                    <Th>Id</Th>
-                    <Th>StartTime</Th>
-                    <Th>Platform</Th>
-                    <Th>AppVersion</Th>
-                    <Th>Connectivity</Th>
-                    <Th>Device</Th>
-                    <Th>OSVersion</Th>
-                    <Th>SessionIndex</Th>
-                    <Th>UserId</Th>
-                    <Th>UserIndex</Th>
-                </Tr>
-                </Thead>
-                <Tbody>
-                {this.renderSessionsRows()}
-                </Tbody>
-            </Table>
+            <DataTable data={this.state.sessions} tblMapping={tblMapping} />
         );
     }
 
-  render() {
-    return (
-        <div>
-            <div className="dates-div">
-                <div>
-                    <span>{'Start: '}</span>
-                    <FormControl
-                        className="date-input"
-                        type="text"
-                        value={this.state.start}
-                        placeholder="Enter start date"
-                        onChange={this.handleChange('start')}
-                    />
+    render() {
+        return (
+            <div>
+                <div className="dates-div">
+                    <div>
+                        <span>{'Start: '}</span>
+                        <FormControl
+                            className="date-input"
+                            type="text"
+                            value={this.state.start}
+                            placeholder="Enter start date"
+                            onChange={this.handleChange('start')}
+                        />
+                    </div>
+                    <div>
+                        <span>{'End: '}</span>
+                        <FormControl
+                          className="date-input"
+                          type="text"
+                          value={this.state.end}
+                          placeholder="Enter end date"
+                          onChange={this.handleChange('end')}
+                        />
+                    </div>
                 </div>
-                <div>
-                    <span>{'End: '}</span>
-                    <FormControl
-                      className="date-input"
-                      type="text"
-                      value={this.state.end}
-                      placeholder="Enter end date"
-                      onChange={this.handleChange('end')}
-                    />
+
+                {this.state.error ? this.renderRequiredError() : null}
+
+                {this.state.pageNumber >= 1 ?  this.renderLabelDiv(): null}
+
+                <div className="btn-div">
+                    <Button bsStyle="primary" onClick={this.initGetSessions(1)}>Get Sessions</Button>
+                    <Button bsStyle="primary" onClick={this.handleChangePage('prev')}>Previous</Button>
+                    <Button bsStyle="primary" onClick={this.handleChangePage('next')}>Next</Button>
+                </div>
+
+                <div className="sessions=tbl">
+                    {this.state.fetching ? 'Loading' : (this.state.sessions.length > 0 ? this.renderSessionsTable() : 'No data')}
                 </div>
             </div>
-
-            {this.state.error ? this.renderRequiredError() : null}
-
-            {this.state.pageNumber >= 1 ?  this.renderLabelDiv(): null}
-
-            <div className="btn-div">
-                <Button bsStyle="primary" onClick={this.initGetSessions(1)}>Get Sessions</Button>
-                <Button bsStyle="primary" onClick={this.handleChangePage('prev')}>Previous</Button>
-                <Button bsStyle="primary" onClick={this.handleChangePage('next')}>Next</Button>
-            </div>
-
-            <div className="sessions=tbl">
-                {this.state.fetching ? 'Loading' : (this.state.sessions.length > 0 ? this.renderSessionsTable() : 'No data')}
-            </div>
-        </div>
-    );
+        );
   }
 }
 
