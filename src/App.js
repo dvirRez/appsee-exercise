@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormControl, Button, Label } from 'react-bootstrap';
+import { Button, Label } from 'react-bootstrap';
 import DataTable from './Components/DataTable/DataTable';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import './App.css';
@@ -27,7 +27,7 @@ class App extends Component {
         sessions: [],
         pageNumber: 1,
         fetching: false,
-        error: false,
+        error: null,
     };
 
     //When inputs change update the state
@@ -39,6 +39,10 @@ class App extends Component {
 
     // Handle changing of pageNumber by prev/next
     handleChangePage = (action) => () => {
+            if(this.state.sessions.length === 0) {
+                return;
+            }
+
             if(action === 'prev') {
                 // Not allowing to fetch pages < 1 when clicking Previous
                 if(this.state.pageNumber === 1 ) {
@@ -47,12 +51,12 @@ class App extends Component {
 
                 this.setState({
                     pageNumber: this.state.pageNumber - 1,
-                }, () => this.initGetSessions(this.state.pageNumber)());
+                }, () => this.initGetSessions(this.state.pageNumber, true)());
             }
             else {
                 this.setState({
                     pageNumber: this.state.pageNumber + 1,
-                }, () => this.initGetSessions(this.state.pageNumber)());
+                }, () => this.initGetSessions(this.state.pageNumber, true)());
             }
 
     };
@@ -67,15 +71,22 @@ class App extends Component {
                     sessions: data.Sessions,
                     fetching: false,
                 });
+            })
+            .catch(error => {
+                this.setState({
+                    error: `Error fetching sessions: ${error.message}`,
+                    fetching: false,
+                });
             });
     };
 
     // Check if inputs are valid and init getting sessions
-    initGetSessions = (pageNumber = 1) => () => {
-        if(this.areInputsValid()) {
+    initGetSessions = (pageNumber = 1, passValidation) => () => {
+        if(this.areInputsValid() || passValidation) {
             this.setState({
                 fetching: true,
-                error: false,
+                pageNumber: pageNumber === 1 ? 1 : this.state.pageNumber,
+                error: null,
             }, () => this.fetchSessions(pageNumber));
         }
     };
@@ -84,7 +95,7 @@ class App extends Component {
     areInputsValid = () => {
         if(this.state.start === '' || this.state.end === '') {
             this.setState({
-                error: true,
+                error: 'Please fill in dates',
             });
 
             return false;
@@ -96,7 +107,7 @@ class App extends Component {
     renderRequiredError = () => {
         return (
             <div className="error">
-                <label>{'Please fill in dates'}</label>
+                <label>{this.state.error}</label>
             </div>
         );
     };
