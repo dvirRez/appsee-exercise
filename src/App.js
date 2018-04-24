@@ -122,22 +122,22 @@ class App extends Component {
                 <div className="dates-div">
                     <div>
                         <span>{'Start: '}</span>
-                        <FormControl
+                        <input
+                            id="date"
+                            type="date"
                             className="date-input"
-                            type="text"
                             value={this.state.start}
-                            placeholder="Enter start date"
                             onChange={this.handleChange('start')}
                         />
                     </div>
                     <div>
                         <span>{'End: '}</span>
-                        <FormControl
-                          className="date-input"
-                          type="text"
-                          value={this.state.end}
-                          placeholder="Enter end date"
-                          onChange={this.handleChange('end')}
+                        <input
+                            id="date"
+                            type="date"
+                            className="date-input"
+                            value={this.state.end}
+                            onChange={this.handleChange('end')}
                         />
                     </div>
                 </div>
