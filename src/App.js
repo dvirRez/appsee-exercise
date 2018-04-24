@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import { Button, Label } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import DataTable from './Components/DataTable/DataTable';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import './App.css';
+
+const sessionsDivPopulatedStyles = {
+    height: '600px',
+    overflowY: 'scroll',
+};
 
 const tblMapping = {
     key: 'Id',
@@ -28,6 +33,16 @@ class App extends Component {
         pageNumber: 1,
         fetching: false,
         error: null,
+        sessionsDivStyles: null,
+    };
+
+    // When detecting end of screen, get next page and update table
+    handleScroll = (e) => {
+        const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+        if (bottom) {
+            console.log('bottom reached');
+            this.getNextPage();
+        }
     };
 
     //When inputs change update the state
@@ -38,27 +53,14 @@ class App extends Component {
     };
 
     // Handle changing of pageNumber by prev/next
-    handleChangePage = (action) => () => {
+    getNextPage = () => {
             if(this.state.sessions.length === 0) {
                 return;
             }
 
-            if(action === 'prev') {
-                // Not allowing to fetch pages < 1 when clicking Previous
-                if(this.state.pageNumber === 1 ) {
-                    return;
-                }
-
-                this.setState({
-                    pageNumber: this.state.pageNumber - 1,
-                }, () => this.initGetSessions(this.state.pageNumber, true)());
-            }
-            else {
-                this.setState({
-                    pageNumber: this.state.pageNumber + 1,
-                }, () => this.initGetSessions(this.state.pageNumber, true)());
-            }
-
+            this.setState({
+                pageNumber: this.state.pageNumber + 1,
+            }, () => this.initGetSessions(this.state.pageNumber, false)());
     };
 
     fetchSessions = (pageNumber) => {
@@ -68,7 +70,8 @@ class App extends Component {
             .then(res => res.json())
             .then(data => {
                 this.setState({
-                    sessions: data.Sessions,
+                    sessions: [...this.state.sessions, ...data.Sessions],
+                    sessionsDivStyles: sessionsDivPopulatedStyles,
                     fetching: false,
                 });
             })
@@ -81,10 +84,10 @@ class App extends Component {
     };
 
     // Check if inputs are valid and init getting sessions
-    initGetSessions = (pageNumber = 1, passValidation) => () => {
-        if(this.areInputsValid() || passValidation) {
+    initGetSessions = (pageNumber = 1, isFirstFetch) => () => {
+        if(this.areInputsValid()) {
             this.setState({
-                fetching: true,
+                fetching: isFirstFetch,
                 pageNumber: pageNumber === 1 ? 1 : this.state.pageNumber,
                 error: null,
             }, () => this.fetchSessions(pageNumber));
@@ -108,15 +111,6 @@ class App extends Component {
         return (
             <div className="error">
                 <label>{this.state.error}</label>
-            </div>
-        );
-    };
-
-    // Page indication rendering
-    renderLabelDiv = () => {
-        return (
-            <div className="label-div">
-                <Label bsStyle="default">{`Page: ${this.state.pageNumber}`}</Label>
             </div>
         );
     };
@@ -155,15 +149,11 @@ class App extends Component {
 
                 {this.state.error ? this.renderRequiredError() : null}
 
-                {this.state.pageNumber >= 1 ?  this.renderLabelDiv(): null}
-
                 <div className="btn-div">
-                    <Button bsStyle="primary" onClick={this.initGetSessions(1)}>Get Sessions</Button>
-                    <Button bsStyle="primary" onClick={this.handleChangePage('prev')}>Previous</Button>
-                    <Button bsStyle="primary" onClick={this.handleChangePage('next')}>Next</Button>
+                    <Button bsStyle="primary" onClick={this.initGetSessions(1, true)}>Get Sessions</Button>
                 </div>
 
-                <div className="sessions=tbl">
+                <div className="sessions=tbl" style={this.state.sessionsDivStyles} onScroll={this.handleScroll}>
                     {this.state.fetching ? 'Loading' : (this.state.sessions.length > 0 ? this.renderSessionsTable() : 'No data')}
                 </div>
             </div>
