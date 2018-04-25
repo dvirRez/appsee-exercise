@@ -5,7 +5,7 @@ import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import './App.css';
 
 const sessionsDivPopulatedStyles = {
-    height: '600px',
+    height: '75vh',
     overflowY: 'scroll',
 };
 
@@ -38,7 +38,7 @@ class App extends Component {
 
     // When detecting end of screen, get next page and update table
     handleScroll = (e) => {
-        const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+        const bottom = Math.floor(e.target.scrollHeight - e.target.scrollTop) <= e.target.clientHeight;
         if (bottom) {
             this.getNextPage();
         }
