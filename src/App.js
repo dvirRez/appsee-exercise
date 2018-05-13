@@ -68,6 +68,7 @@ class App extends Component {
         fetch(apiString)
             .then(res => res.json())
             .then(data => {
+                console.log(data.Sessions);
                 this.setState({
                     sessions: [...this.state.sessions, ...data.Sessions],
                     sessionsDivStyles: sessionsDivPopulatedStyles,
